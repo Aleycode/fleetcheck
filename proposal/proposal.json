@@ -1,0 +1,665 @@
+{
+ "tool": "proposal_tool",
+ "version": "4.11.0",
+ "stage": "proposal",
+ "stageLabel": "Proposal",
+ "stageFills": "The plan: who the system is for, what it will do, how it will be built and checked, and who does what. Nothing is implemented yet: the Delivery and evidence part stays empty.",
+ "saved": "2026-10-17T19:14:51.613Z",
+ "proposal": {
+  "course": "SEN0414",
+  "stage": "proposal",
+  "semester": "2026-2027 Fall",
+  "title": "Consistency checker for ambulance maintenance and mileage records",
+  "team": [
+   {
+    "name": "Aleyna Cebeci",
+    "no": "2100002803",
+    "email": "2100002803@stu.iku.edu.tr",
+    "share": "100",
+    "admin": [
+     "A_TeamLead",
+     "A_CustomerLiaison",
+     "A_LogSteward",
+     "A_QualityLead",
+     "A_ReleaseManager",
+     "A_DocLead"
+    ],
+    "dev": [
+     "R_Analyst",
+     "R_Architect",
+     "R_Ontologist",
+     "R_Backend",
+     "R_Tester",
+     "R_Ops"
+    ]
+   }
+  ],
+  "leads": {
+   "P01": "Aleyna Cebeci",
+   "P02": "Aleyna Cebeci",
+   "P03": "Aleyna Cebeci",
+   "P04": "Aleyna Cebeci",
+   "P05": "Aleyna Cebeci",
+   "P06": "Aleyna Cebeci",
+   "P07": "Aleyna Cebeci",
+   "P08": "Aleyna Cebeci",
+   "P09": "Aleyna Cebeci",
+   "P10": "Aleyna Cebeci",
+   "P11": "Aleyna Cebeci",
+   "P12": "Aleyna Cebeci",
+   "P13": "Aleyna Cebeci",
+   "P14": "Aleyna Cebeci"
+  },
+  "modules": [
+   {
+    "name": "Export importer and graph builder",
+    "kind": "module",
+    "what": "Reads the vehicle, maintenance, fault and mileage-history exports from the Portal database with openpyxl and pandas, anonymises them and turns every row into RDF with RDFLib",
+    "epic": "E1",
+    "owner": "Aleyna Cebeci",
+    "second": ""
+   },
+   {
+    "name": "Rule set and validator",
+    "kind": "module",
+    "what": "Holds the SHACL shapes for the consistency rules and the SKOS scheme of fault types, runs pySHACL and collects every violation with its severity",
+    "epic": "E2",
+    "owner": "Aleyna Cebeci",
+    "second": ""
+   },
+   {
+    "name": "Report and correction proposal",
+    "kind": "feature",
+    "what": "Writes the violation report as HTML and CSV, the correction-proposal file and the PROV-O record of each run",
+    "epic": "E2",
+    "owner": "Aleyna Cebeci",
+    "second": ""
+   },
+   {
+    "name": "Early-warning panel",
+    "kind": "feature",
+    "what": "FastAPI page that shows violations per vehicle, the monthly trend and the vehicles whose periodic maintenance is due soon",
+    "epic": "E3",
+    "owner": "Aleyna Cebeci",
+    "second": ""
+   }
+  ],
+  "repo": "https://github.com/Aleycode/fleetcheck",
+  "customers": [
+   {
+    "name": "İstanbul İl Ambulans Servisi Başhekimliği, Araç Bakım Onarım Birimi (Vehicle Maintenance and Repair Unit)",
+    "contact": "Head of the vehicle maintenance and repair unit (bakım onarım birim sorumlusu)",
+    "reached": "Face-to-face at the unit office on 17 October 2026; the developer works with the unit daily",
+    "relation": "owner",
+    "gets": "an automatic check of the vehicle records its clerks enter into the Portal, a monthly violation report and an early warning for periodic maintenance, so corrections stop depending on one developer reading the database by hand"
+   }
+  ],
+  "endUsers": [
+   {
+    "group": "Maintenance clerk",
+    "who": "the clerks of the vehicle maintenance unit who enter maintenance, fault and mileage records for the ambulance fleet into the Portal",
+    "task": "uploads the Portal export, reads the violation list and corrects the records it names in the Portal",
+    "frequency": "weekly",
+    "device": "office desktop, browser and Excel"
+   },
+   {
+    "group": "Fleet supervisor",
+    "who": "the supervisor of the vehicle maintenance unit who answers for the fleet's maintenance schedule",
+    "task": "reads the monthly summary and the list of vehicles whose periodic maintenance is due",
+    "frequency": "monthly",
+    "device": "office desktop browser"
+   }
+  ],
+  "problem": "The vehicle maintenance unit of the İstanbul provincial health directorate records every fault, maintenance visit and mileage reading of the ambulance fleet in the Portal's maintenance module (Bakım Onarım). The module stores what is typed but checks nothing against the other records of the same vehicle. A vehicle's current mileage, the mileage written on a fault record and the mileage history are three separate fields, and they drift apart. Between 1 September and 1 October 2026 the unit entered 1,702 fault records for 536 of the fleet's 577 active vehicles. In 49 of those records the mileage written on the fault is lower than the mileage of the same vehicle's previous fault, so the vehicle's mileage runs backwards; 45 vehicles are affected, about 8 percent of the vehicles that had a fault that month. Two more records jump by over 30,000 km between consecutive faults. None of this is flagged by the module. Today an error is found only when the unit notices a wrong maintenance due date or a fault that cannot be opened because the stored mileage is too high, and it is corrected by a developer reading the database by hand, about 5 hours a month; the rest stay in the records. On 17 October 2026 the module's own dashboard shows 45 vehicles past their periodic maintenance mileage and 17 approaching it, with no warning sent to anyone. Each uncorrected error delays or hides a periodic maintenance, which for an ambulance means a vehicle that may be off the road when it is needed.",
+  "mission": "Give the Maintenance clerk and the Fleet supervisor of the vehicle maintenance unit a tool that reads the Portal's vehicle export, checks every maintenance, fault and mileage record against a written set of consistency rules, lists each violation with the rule it breaks, and warns which vehicles are approaching their periodic maintenance, so that record errors are found the week they are made rather than when a maintenance is missed, and nobody has to read the database by hand.",
+  "missionOrigin": "IOrigin_OwnerStated",
+  "outcome": "A maintenance clerk uploads the weekly export and within a minute sees which records contradict each other and why; the fleet supervisor opens the panel and sees which ambulances are due for periodic maintenance in the next two weeks, without asking a developer to query the database.",
+  "areas": [
+   {
+    "area": "Import and knowledge graph",
+    "where": "importer/ and graph/",
+    "measure": "four Portal tables, 1,702 fault records in September 2026 for 577 active vehicles, no checks today"
+   },
+   {
+    "area": "Rules, report and correction proposals",
+    "where": "rules/ and report/",
+    "measure": "49 backward-mileage records in September 2026, found by hand if at all"
+   },
+   {
+    "area": "Panel and early warning",
+    "where": "web/",
+    "measure": "45 vehicles past periodic maintenance and 17 approaching it on 17 October 2026; no forecast or warning today"
+   }
+  ],
+  "deliverables": [
+   {
+    "text": "Importer that reads the vehicle, maintenance, fault and mileage-history exports and anonymises plates and names",
+    "area": "A1",
+    "layer": "Layer_Product",
+    "kind": "Kind_Functional"
+   },
+   {
+    "text": "Fleet ontology with a SKOS scheme of fault types and an RDF graph of all records",
+    "area": "A1",
+    "layer": "Layer_Product",
+    "kind": "Kind_Functional"
+   },
+   {
+    "text": "SHACL rule set with violation and warning severities, checked with pySHACL",
+    "area": "A2",
+    "layer": "Layer_Product",
+    "kind": "Kind_Functional"
+   },
+   {
+    "text": "Violation report (HTML and CSV), correction-proposal file and PROV-O record per run",
+    "area": "A2",
+    "layer": "Layer_Product",
+    "kind": "Kind_Functional"
+   },
+   {
+    "text": "A monthly export of about 1,700 fault records checked in under one minute",
+    "area": "A2",
+    "layer": "Layer_Product",
+    "kind": "Kind_NonFunctional"
+   },
+   {
+    "text": "Web panel with violations per vehicle, monthly trend and periodic-maintenance forecast",
+    "area": "A3",
+    "layer": "Layer_Product",
+    "kind": "Kind_Functional"
+   },
+   {
+    "text": "Test suite, continuous integration and tagged releases on GitHub",
+    "area": "A2",
+    "layer": "Layer_Work",
+    "kind": "Kind_NonFunctional"
+   }
+  ],
+  "exclusions": [
+   {
+    "what": "Writing corrections back into the Portal database",
+    "why": "the Portal is a live system used by the whole service; the tool proposes corrections and a clerk applies them in the Portal"
+   },
+   {
+    "what": "Driver, patient and personnel data",
+    "why": "the rules need only vehicle, mileage and date fields, and personal data would bring the KVKK duties into the project"
+   },
+   {
+    "what": "Replacing the Portal's vehicle module or its screens",
+    "why": "the unit keeps entering records where it does today; the tool runs beside the Portal on an export"
+   },
+   {
+    "what": "Predicting faults from sensor or telematics data",
+    "why": "the fleet has no telematics feed; the forecast uses only the mileage history already recorded"
+   }
+  ],
+  "entities": [
+   {
+    "entity": "Vehicle",
+    "def": "an ambulance of the fleet, identified by an anonymised vehicle code, with its current mileage and periodic maintenance mileage",
+    "create": "no",
+    "use": "yes",
+    "end": "no"
+   },
+   {
+    "entity": "Mileage reading",
+    "def": "one dated mileage value of a vehicle from the mileage history",
+    "create": "no",
+    "use": "yes",
+    "end": "no"
+   },
+   {
+    "entity": "Fault record",
+    "def": "a reported fault of a vehicle with its date, mileage and fault type from the SKOS scheme",
+    "create": "no",
+    "use": "yes",
+    "end": "no"
+   },
+   {
+    "entity": "Maintenance visit",
+    "def": "a periodic or corrective maintenance of a vehicle with its date, mileage and the fault it repaired, if any",
+    "create": "no",
+    "use": "yes",
+    "end": "no"
+   },
+   {
+    "entity": "Violation",
+    "def": "one record that breaks one rule, with the rule, the severity and the values that contradict each other",
+    "create": "yes",
+    "use": "yes",
+    "end": "yes"
+   },
+   {
+    "entity": "Check run",
+    "def": "one execution of the checker on one export, with its date, rule-set version and PROV-O record",
+    "create": "yes",
+    "use": "yes",
+    "end": "no"
+   }
+  ],
+  "projectKinds": [
+   "PK_ShapeService"
+  ],
+  "tech": [
+   "RDFLibPython",
+   "PySHACLLib",
+   "SHACLCore",
+   "SKOSVocabularyModel",
+   "SPARQLFamily",
+   "OxigraphStore",
+   "PROVOStandard",
+   "KVKKRegime",
+   "SHACLCIGates"
+  ],
+  "techWhy": "RDFLib turns each export row into RDF statements about vehicles, readings, faults and visits, so the four Portal tables become one graph in which a vehicle's records can be compared. SHACL shapes, checked with pySHACL, state each consistency rule once, in a form the unit can read: a mileage reading may not be lower than the one before it, a repair may not be dated before its fault, a periodic maintenance mileage that is passed without a visit is a warning. A SKOS scheme holds the fault types, so 'motor' and 'MOTOR' are one concept. SPARQL queries over an Oxigraph store produce the report tables and the per-vehicle mileage rate used by the forecast. PROV-O records which export, which rule-set version and which run produced every report, so a correction can always be traced. The KVKK regime sets what the importer must strip before anything reaches the repository, and SHACL continuous-integration gates run the rules on every commit.",
+  "goals": [
+   {
+    "goal": "Every contradictory maintenance, fault or mileage record is listed with the rule it breaks within a week of being entered",
+    "facing": "Facing_Mission",
+    "area": "A2",
+    "why": "this is the change the maintenance unit asked for: errors found when made, not when a maintenance is missed"
+   },
+   {
+    "goal": "The graph holds every vehicle, reading, fault and visit of the export, with each fault typed from the scheme",
+    "facing": "Facing_Scope",
+    "area": "A1",
+    "why": "a record missing from the graph is a record no rule can check"
+   },
+   {
+    "goal": "The supervisor sees which vehicles are due for periodic maintenance and the monthly violation trend without a developer",
+    "facing": "Facing_Scope",
+    "area": "A3",
+    "why": "the panel is what turns a report into a weekly habit of the unit"
+   },
+   {
+    "goal": "The tool never writes to the Portal and no personal data enters the graph, the reports or the repository",
+    "facing": "Facing_Containment",
+    "area": "A2",
+    "why": "the Portal is live and the KVKK regime applies; the checker must stay a reader"
+   }
+  ],
+  "spec": "The system reads the vehicle, maintenance, fault and mileage-history exports of the Portal as Excel or CSV files, replaces plates and names with codes, and builds an RDF graph of vehicles, mileage readings, fault records and maintenance visits, with fault types taken from a SKOS scheme. It validates the graph against a SHACL rule set in which each rule has a severity: mileage going backwards, a fault mileage above the vehicle's current mileage, a repair dated before its fault, a missing fault type and a periodic maintenance mileage that has been passed without a visit. It writes a report that names each violating record, the rule, the severity and the contradicting values, writes a correction-proposal file for the clerk, and records the run in PROV-O with the export's hash and the rule-set version. It computes each vehicle's average daily mileage from the history and forecasts the date its periodic maintenance falls due. A web panel shows violations per vehicle, the monthly trend and the vehicles due within a chosen number of days. When an export is missing a table or a required column, the tool stops and names the missing part instead of checking a partial graph.",
+  "scenarios": [
+   {
+    "kind": "Scen_Nominal",
+    "text": "Given an export in which vehicle A017 has a mileage reading of 84,300 followed by a fault recorded at 83,900, when the clerk runs the check, then the report lists the fault record under the rule 'mileage may not go backwards' with both values"
+   },
+   {
+    "kind": "Scen_Rejection",
+    "text": "Given an export in which the mileage-history table is missing, when the clerk runs the check, then the tool produces no report and says which table is missing"
+   },
+   {
+    "kind": "Scen_Boundary",
+    "text": "Given a vehicle whose periodic maintenance mileage equals its current mileage exactly, when the check runs, then the vehicle appears as due today and not as overdue"
+   },
+   {
+    "kind": "Scen_Absent",
+    "text": "Given a vehicle with no mileage reading at all, when the check runs, then the forecast for that vehicle says 'no history' instead of a date"
+   }
+  ],
+  "useCase": "Maintenance clerk: upload export, read report, open a violation, download the correction proposal. Fleet supervisor: open panel, read monthly summary, read the due-soon list. Developer (me): add a rule, run the tests, tag a release.",
+  "objectives": [
+   {
+    "objective": "Contradictory records found within a week of entry",
+    "goal": "G1",
+    "mkind": "Meas_Derived",
+    "query": "violations found by the weekly run divided by the corrections the unit made in the same month, from the report files and the unit's correction list",
+    "baseline": "49 contradictory fault records in September 2026, found only when noticed",
+    "target": "100% of them found by the weekly run",
+    "dir": "Dir_Increase"
+   },
+   {
+    "objective": "Records of the export present in the graph",
+    "goal": "G2",
+    "mkind": "Meas_Counted",
+    "query": "rows in the four export tables compared with the subjects of the matching type in the graph, by a SPARQL count after each import",
+    "baseline": "0% (no graph today)",
+    "target": "100%",
+    "dir": "Dir_Increase"
+   },
+   {
+    "objective": "Hours a developer spends reading the database to find record errors",
+    "goal": "G1",
+    "mkind": "Meas_Judged",
+    "query": "hours per month recorded by the developer for manual correction work, before and after the tool",
+    "baseline": "5 hours a month",
+    "target": "1 hour a month",
+    "dir": "Dir_Decrease"
+   },
+   {
+    "objective": "Vehicles whose periodic maintenance is passed without a visit",
+    "goal": "G3",
+    "mkind": "Meas_Counted",
+    "query": "vehicles in the monthly report whose current mileage exceeds their periodic maintenance mileage with no visit recorded",
+    "baseline": "45 vehicles on 17 October 2026",
+    "target": "0",
+    "dir": "Dir_Decrease"
+   },
+   {
+    "objective": "Personal data items and Portal writes",
+    "goal": "G4",
+    "mkind": "Meas_Counted",
+    "query": "a regex scan of the repository, the graph and the reports for plates, names and identity numbers, and the absence of any database write statement in the code",
+    "baseline": "0",
+    "target": "0",
+    "dir": "Dir_Hold"
+   }
+  ],
+  "activity": "The clerk exports the four tables from the Portal and uploads them. The importer checks that every table and required column is present; if one is missing it stops and names it. Otherwise it anonymises plates and names, builds the graph and loads it into the store. The validator runs the SHACL rules; each violation is collected with its severity. The reporter writes the HTML and CSV report and the correction proposal, and records the run in PROV-O. The forecaster computes each vehicle's daily mileage rate and its due date. The panel reads the latest run and shows the summary; the clerk corrects the named records in the Portal and the next weekly run shows whether the violations are gone.",
+  "sequence": "The clerk sends the export files to the command-line tool. The tool asks the importer to parse and anonymise them and receives a graph. It sends the graph to the Oxigraph store, then asks pySHACL to validate the graph against the rule set and receives a validation report. It passes the report to the reporter, which queries the store with SPARQL for the contradicting values and writes the files. The reporter asks the provenance recorder to store the run. The panel, when opened by the supervisor, queries the store for the latest run, the per-vehicle counts and the forecast, and renders the page.",
+  "initiativeKind": "Kind_InitialDevelopment",
+  "epics": [
+   {
+    "epic": "Bring the Portal's vehicle records into one checkable graph",
+    "objective": "O2"
+   },
+   {
+    "epic": "Find and report every contradictory record",
+    "objective": "O1"
+   },
+   {
+    "epic": "Warn before a periodic maintenance is missed",
+    "objective": "O4"
+   }
+  ],
+  "stories": [
+   {
+    "epic": "E1",
+    "role": "Maintenance clerk",
+    "want": "to upload the four Portal exports in one step",
+    "so": "I do not have to prepare anything by hand before the check",
+    "ac": "Given the four export files of a month, when I run the tool with the folder, then every row of every table is loaded and the tool prints how many vehicles, readings, faults and visits it read",
+    "cat": "Cat_NewCapability",
+    "concern": "Concern_Interface",
+    "bv": "8",
+    "tc": "7",
+    "rr": "6",
+    "js": "4"
+   },
+   {
+    "epic": "E1",
+    "role": "İstanbul İl Ambulans Servisi Başhekimliği, Araç Bakım Onarım Birimi (Vehicle Maintenance and Repair Unit)",
+    "want": "plates, driver names and personnel names removed before anything is stored",
+    "so": "the unit's data can be used without KVKK exposure",
+    "ac": "Given an export with plates and names, when the importer runs, then the graph and every report contain only vehicle codes and no plate, name or identity number",
+    "cat": "Cat_Compliance",
+    "concern": "Concern_Data",
+    "bv": "7",
+    "tc": "8",
+    "rr": "9",
+    "js": "3"
+   },
+   {
+    "epic": "E2",
+    "role": "Maintenance clerk",
+    "want": "every record whose mileage goes backwards listed with both values",
+    "so": "I can see at once which of the two readings is wrong",
+    "ac": "Given a vehicle whose fault mileage is lower than its previous reading, when the check runs, then the report lists that fault with the rule name, the previous reading and the fault mileage",
+    "cat": "Cat_NewCapability",
+    "concern": "Concern_Data",
+    "bv": "10",
+    "tc": "8",
+    "rr": "7",
+    "js": "5"
+   },
+   {
+    "epic": "E2",
+    "role": "Maintenance clerk",
+    "want": "a repair dated before its fault and a fault without a type to be flagged",
+    "so": "the two most common typing errors are caught the same week",
+    "ac": "Given a maintenance visit dated before the fault it repairs, when the check runs, then the report lists the visit under the date rule as a violation and lists any untyped fault as a warning",
+    "cat": "Cat_NewCapability",
+    "concern": "Concern_Data",
+    "bv": "8",
+    "tc": "6",
+    "rr": "6",
+    "js": "4"
+   },
+   {
+    "epic": "E2",
+    "role": "Maintenance clerk",
+    "want": "a correction-proposal file I can follow in the Portal",
+    "so": "I correct records without asking a developer",
+    "ac": "Given a report with violations, when the run finishes, then a CSV lists each record, the field to change and the proposed value, and the Portal itself is never written to",
+    "cat": "Cat_NewCapability",
+    "concern": "Concern_Interface",
+    "bv": "9",
+    "tc": "6",
+    "rr": "5",
+    "js": "4"
+   },
+   {
+    "epic": "E2",
+    "role": "İstanbul İl Ambulans Servisi Başhekimliği, Araç Bakım Onarım Birimi (Vehicle Maintenance and Repair Unit)",
+    "want": "every report to say which export and which rule version produced it",
+    "so": "a disputed correction can be traced months later",
+    "ac": "Given a finished run, when the supervisor opens its record, then it shows the export's hash, the rule-set version, the date and the number of violations",
+    "cat": "Cat_NewCapability",
+    "concern": "Concern_Architecture",
+    "bv": "6",
+    "tc": "4",
+    "rr": "6",
+    "js": "3"
+   },
+   {
+    "epic": "E3",
+    "role": "Fleet supervisor",
+    "want": "to see which vehicles are due for periodic maintenance in the next 14 days",
+    "so": "I plan the workshop before a vehicle goes overdue",
+    "ac": "Given each vehicle's mileage history and periodic maintenance mileage, when I open the panel, then vehicles are listed with their forecast due date and those within 14 days are marked",
+    "cat": "Cat_NewCapability",
+    "concern": "Concern_Interface_UI",
+    "bv": "9",
+    "tc": "7",
+    "rr": "7",
+    "js": "6"
+   },
+   {
+    "epic": "E3",
+    "role": "Fleet supervisor",
+    "want": "a monthly trend of violations per vehicle",
+    "so": "I can see whether the unit's records are getting better",
+    "ac": "Given at least two monthly runs, when I open the panel, then it shows violations per month and the five vehicles with the most violations",
+    "cat": "Cat_NewCapability",
+    "concern": "Concern_Interface_UI",
+    "bv": "6",
+    "tc": "4",
+    "rr": "4",
+    "js": "4"
+   }
+  ],
+  "dod": [
+   {
+    "criterion": "All tests pass in continuous integration",
+    "check": "GitHub Actions run on every push, green before merge"
+   },
+   {
+    "criterion": "The sample export validates with no unexpected violation",
+    "check": "pySHACL report of the sample attached to the run"
+   },
+   {
+    "criterion": "The story's acceptance criterion is shown working",
+    "check": "a pytest test named after the story, or a recorded run"
+   },
+   {
+    "criterion": "No personal data in the repository",
+    "check": "regex scan of the repository runs in continuous integration"
+   }
+  ],
+  "classModel": "Vehicle has a code, a current mileage, a periodic maintenance mileage and many MileageReadings, FaultRecords and MaintenanceVisits. MileageReading has a date and a value. FaultRecord has a date, a mileage and a FaultType from the SKOS scheme. MaintenanceVisit has a date, a mileage, a kind (periodic or corrective) and an optional repaired FaultRecord. Rule has an identifier, a text, a severity and a SHACL shape. Violation links one record to one Rule with the contradicting values. CheckRun has a date, the export hash, the rule-set version and many Violations; it is a PROV-O activity that used the export and generated the report. Forecast belongs to a Vehicle and has a daily rate and a due date.",
+  "tests": [
+   {
+    "story": "S1",
+    "case": "load the sample month and count vehicles, readings, faults and visits against the row counts",
+    "data": "anonymised sample export of one month"
+   },
+   {
+    "story": "S2",
+    "case": "run the importer on a raw sample and scan the graph and reports for plates, names and identity numbers",
+    "data": "a sample with ten synthetic plates and names"
+   },
+   {
+    "story": "S3",
+    "case": "a fault with a mileage lower than the previous reading appears in the report with both values",
+    "data": "vehicle A017 with readings 84,300 and a fault at 83,900"
+   },
+   {
+    "story": "S4",
+    "case": "a visit dated before its fault is a violation and an untyped fault is a warning",
+    "data": "one visit dated two days before its fault; one fault with an empty type"
+   },
+   {
+    "story": "S5",
+    "case": "the correction CSV lists each violation with field and proposed value, and the code has no database write",
+    "data": "the report of the sample month"
+   },
+   {
+    "story": "S6",
+    "case": "the run record holds export hash, rule version, date and violation count",
+    "data": "one finished run"
+   },
+   {
+    "story": "S7",
+    "case": "vehicles within 14 days of their forecast due date are marked on the panel",
+    "data": "three vehicles with known daily rates"
+   },
+   {
+    "story": "S8",
+    "case": "two monthly runs give a two-point trend and a top-five list",
+    "data": "two sample months"
+   }
+  ],
+  "model_Data": "Design-level class diagram: Vehicle, MileageReading, FaultRecord, MaintenanceVisit, FaultType, Rule, Violation, CheckRun and Forecast as in the class model. VehicleShape requires a code and a periodic maintenance mileage; ReadingShape requires a date and a non-negative value; FaultShape requires a FaultType from the scheme; VisitShape requires a date not earlier than its repaired fault; CheckRun is a prov:Activity that used the export entity and generated the report entity.",
+  "model_Architecture": "Component diagram: Importer (openpyxl, pandas) feeds Anonymiser (regex) feeds GraphBuilder (RDFLib); Store (Oxigraph) holds the graph; Validator (pySHACL) reads the rule set and the graph and emits violations; Reporter (Jinja2 templates, csv) and ProvenanceRecorder (RDFLib, PROV-O) write the outputs; Forecaster reads the store over SPARQL; Panel (FastAPI) reads the store and the latest run. The command-line entry point orders them; the Portal is outside the system and only its export files cross the boundary.",
+  "model_Interface": "Component diagram of the boundaries: the command-line tool takes a folder with the four export files (vehicles, readings, faults, visits as .xlsx or .csv with named columns) and writes report.html, report.csv, corrections.csv and run.ttl into a dated folder; the panel exposes GET / for the summary, GET /vehicle/{code} for one vehicle's violations and forecast, and GET /runs/{id} for a run's provenance as JSON-LD. Nothing is written to the Portal.",
+  "model_User_interface": "Panel: a header with the date of the latest run and the violation count; a table of vehicles with code, violations, forecast due date and a 'due within 14 days' mark, sortable by each column; a monthly trend chart below; clicking a vehicle opens its violations with the rule text and the contradicting values. One page, readable on an office desktop browser without training.",
+  "libraries": "openpyxl and pandas read the Excel and CSV exports; regular expressions anonymise plates and names and scan the outputs; dataclasses and typing describe vehicles, readings, faults and visits; generators stream rows into the graph; a decorator times and logs each stage; a context manager opens and closes the Oxigraph store; concurrent.futures loads the four tables in parallel; argparse builds the command-line tool; logging writes the run log; pytest and GitHub Actions test every rule; RDFLib, pySHACL and Jinja2 build, validate and report the graph; FastAPI serves the panel. Course topics applied: object-oriented design, iterators and generators, decorators and context managers, regular expressions, concurrency, testing, packaging with pyproject and a command-line interface.",
+  "milestones": [
+   {
+    "date": "2026-10-30",
+    "deliverable": "Importer with anonymisation, fleet ontology, SKOS fault scheme and first graph of a sample month, with tests",
+    "owner": "Aleyna Cebeci"
+   },
+   {
+    "date": "2026-11-13",
+    "deliverable": "SHACL rule set with severities, violation report (HTML and CSV) and PROV-O run record",
+    "owner": "Aleyna Cebeci"
+   },
+   {
+    "date": "2026-11-27",
+    "deliverable": "Correction-proposal file, forecast and web panel with trend and due-soon list",
+    "owner": "Aleyna Cebeci"
+   },
+   {
+    "date": "2026-12-07",
+    "deliverable": "Pilot run on a real anonymised month with the maintenance unit; findings recorded",
+    "owner": "Aleyna Cebeci"
+   },
+   {
+    "date": "2026-12-15",
+    "deliverable": "Tagged release v1.0, test report from continuous integration, user guide and lessons learned",
+    "owner": "Aleyna Cebeci"
+   }
+  ],
+  "risks": [
+   {
+    "risk": "The export's column names or layout change between months",
+    "likelihood": "medium",
+    "impact": "medium",
+    "mitigation": "the importer checks columns by name and stops with the missing column's name; a test per table layout"
+   },
+   {
+    "risk": "A sample export still contains personal data",
+    "likelihood": "medium",
+    "impact": "high",
+    "mitigation": "anonymisation runs before anything is written; a regex scan runs in continuous integration and blocks the merge"
+   },
+   {
+    "risk": "The maintenance unit has no time for the pilot in December",
+    "likelihood": "medium",
+    "impact": "high",
+    "mitigation": "book the pilot date in the first meeting and keep the pilot to one hour with a prepared export"
+   },
+   {
+    "risk": "One person: illness or workload stops the project for a week",
+    "likelihood": "medium",
+    "impact": "high",
+    "mitigation": "the panel and the trend are the last stories by priority; the core checker is finished by mid-November, and the last week of the term is left free"
+   },
+   {
+    "risk": "Mileage history too sparse for a usable forecast",
+    "likelihood": "low",
+    "impact": "medium",
+    "mitigation": "the forecast falls back to the fleet's average daily mileage and says so on the panel"
+   }
+  ],
+  "refs": [
+   {
+    "ref": "W3C (2017). Shapes Constraint Language (SHACL). W3C Recommendation. https://www.w3.org/TR/shacl/"
+   },
+   {
+    "ref": "W3C (2014). RDF 1.1 Concepts and Abstract Syntax. W3C Recommendation."
+   },
+   {
+    "ref": "W3C (2009). SKOS Simple Knowledge Organization System Reference. W3C Recommendation."
+   },
+   {
+    "ref": "W3C (2013). PROV-O: The PROV Ontology. W3C Recommendation."
+   },
+   {
+    "ref": "W3C (2013). SPARQL 1.1 Query Language. W3C Recommendation."
+   },
+   {
+    "ref": "RDFLib documentation, https://rdflib.readthedocs.io; pySHACL, https://github.com/RDFLib/pySHACL"
+   },
+   {
+    "ref": "Sweigart, A. (2025). Automate the Boring Stuff with Python, 3rd ed. No Starch Press."
+   },
+   {
+    "ref": "Kişisel Verilerin Korunması Kanunu (KVKK), Law No. 6698, Official Gazette 7 April 2016."
+   }
+  ],
+  "worklog": [
+   {
+    "seq": 1,
+    "ts": "2026-10-17T18:43:12.531Z",
+    "member": "Aleyna Cebeci",
+    "process": "P01",
+    "story": "",
+    "hours": 2,
+    "description": "Chose the project topic, prepared the proposal draft in the Workbench and created the fleetcheck repository",
+    "evidence": "https://github.com/Aleycode/fleetcheck",
+    "kind": "work",
+    "ref": "",
+    "prev": "GENESIS",
+    "hash": "c4597edc788ace1a2cb03ca123c46ff703fec2179d54e59bdf929572fa463c3c"
+   },
+   {
+    "seq": 2,
+    "ts": "2026-10-17T19:13:08.962Z",
+    "member": "Aleyna Cebeci",
+    "process": "P02",
+    "story": "",
+    "hours": 2,
+    "description": "Met the maintenance unit head, exported the September fault list from the Portal, computed baseline numbers and completed the proposal",
+    "evidence": "https://github.com/Aleycode/fleetcheck",
+    "kind": "work",
+    "ref": "",
+    "prev": "c4597edc788ace1a2cb03ca123c46ff703fec2179d54e59bdf929572fa463c3c",
+    "hash": "17aed2a9e422a40b5d9b479a73c74deb7d2ea50e8b24e44b4f97db5c35a7768d"
+   }
+  ],
+  "repoCheck": {
+   "ok": true,
+   "result": "found",
+   "at": "2026-10-17T18:40:00.853Z",
+   "full_name": "Aleycode/fleetcheck",
+   "html_url": "https://github.com/Aleycode/fleetcheck",
+   "private": false,
+   "created_at": "2026-10-17T18:39:11Z",
+   "pushed_at": "2026-10-17T18:39:12Z",
+   "default_branch": "main",
+   "id": 1423634176
+  }
+ }
+}
